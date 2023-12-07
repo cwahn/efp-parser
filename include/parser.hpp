@@ -1,9 +1,6 @@
 #ifndef EFP_PARSER_HPP_
 #define EFP_PARSER_HPP_
 
-#ifndef PARSER_HPP_
-#define PARSER_HPP_
-
 #include "prelude.hpp"
 #include "string.hpp"
 
@@ -36,8 +33,7 @@ namespace efp
         {
             const char c;
 
-            template <typename In>
-            Maybe<Pair<StringView, StringView>> operator()(const Seq<In> &in)
+            Maybe<Pair<StringView, StringView>> operator()(const StringView &in)
             {
                 if (length(in) > 0)
                 {
@@ -55,34 +51,11 @@ namespace efp
             return Ch{c};
         }
 
-        // #define EFP_PARSER_TAG(name, str)                                                       \
-//     struct name                                                                         \
-//     {                                                                                   \
-//         using namespace efp;                                                            \
-//                                                                                         \
-//         static StringView tag_str;                                                      \
-//                                                                                         \
-//         template <typename In>                                                          \
-//         static Maybe<Pair<StringView, StringView>> operator()(const Seq<In> &in)        \
-//         {                                                                               \
-//             if (length(in) > 0)                                                         \
-//             {                                                                           \
-//                 if (parser::start_with(in, tag_str))                                    \
-//                     return tuple(drop(length(tag_str), in), take(length(tag_str), in)); \
-//                 else                                                                    \
-//                     return nothing;                                                     \
-//             }                                                                           \
-//             return nothing;                                                             \
-//         }                                                                               \
-//     };                                                                                  \
-//     StringView name::tag_str = StringView(str, strlen(str));
-
         struct Tag
         {
             StringView t;
 
-            template <typename In>
-            Maybe<Pair<StringView, StringView>> operator()(const Seq<In> &in)
+            Maybe<Pair<StringView, StringView>> operator()(const StringView &in)
             {
                 if (start_with(in, t))
                     return tuple(drop(length(t), in), t);
@@ -98,44 +71,76 @@ namespace efp
 
         // alpha
 
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> alpha0(const Seq<In> &in)
+        // Maybe<Pair<StringView, StringView>> alpha0(const StringView &in)
+        // {
+        //     size_t i = 0;
+        //     while (i < length(in) && std::isalpha(in[i]))
+        //     {
+        //         ++i;
+        //     }
+
+        //     // Return the consumed characters and the rest of the input
+        //     if (i > 0)
+        //         return tuple(drop(i, in), take(i, in));
+        //     else
+        //         // Return the whole input and an empty string since no characters were consumed
+        //         return tuple(drop(0, in), StringView{in.data(), 0});
+        // }
+
+        auto alpha0 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
         {
             size_t i = 0;
             while (i < length(in) && std::isalpha(in[i]))
             {
                 ++i;
             }
-
-            // Return the consumed characters and the rest of the input
-            if (i > 0)
-                return tuple(drop(i, in), take(i, in));
-            else
-                // Return the whole input and an empty string since no characters were consumed
-                return tuple(drop(0, in), StringView{in.data(), 0});
-        }
+            return i > 0 ? tuple(drop(i, in), take(i, in)) : tuple(drop(0, in), StringView{in.data(), 0});
+        };
 
         // alpha1 will parse one or more alphabetic characters
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> alpha1(const Seq<In> &in)
+
+        // Maybe<Pair<StringView, StringView>> alpha1(const StringView &in)
+        // {
+        //     size_t i = 0;
+        //     while (i < length(in) && std::isalpha(in[i]))
+        //     {
+        //         ++i;
+        //     }
+
+        //     // Must have consumed at least one character to succeed
+        //     if (i > 0)
+        //         return tuple(drop(i, in), take(i, in));
+        //     else
+        //         // If no characters were consumed, return nothing to indicate failure
+        //         return nothing;
+        // }
+        auto alpha1 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
         {
             size_t i = 0;
             while (i < length(in) && std::isalpha(in[i]))
             {
                 ++i;
             }
-
             // Must have consumed at least one character to succeed
             if (i > 0)
                 return tuple(drop(i, in), take(i, in));
             else
                 // If no characters were consumed, return nothing to indicate failure
                 return nothing;
-        }
+        };
 
         // numeric0 will parse zero or more numeric characters
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> numeric0(const Seq<In> &in)
+
+        // Maybe<Pair<StringView, StringView>> numeric0(const StringView &in)
+        // {
+        //     size_t i = 0;
+        //     while (i < length(in) && std::isdigit(in[i]))
+        //     {
+        //         ++i;
+        //     }
+        //     return tuple(drop(i, in), take(i, in));
+        // }
+        auto numeric0 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
         {
             size_t i = 0;
             while (i < length(in) && std::isdigit(in[i]))
@@ -143,27 +148,40 @@ namespace efp
                 ++i;
             }
             return tuple(drop(i, in), take(i, in));
-        }
+        };
 
         // numeric1 will parse one or more numeric characters
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> numeric1(const Seq<In> &in)
+
+        // Maybe<Pair<StringView, StringView>> numeric1(const StringView &in)
+        // {
+        //     size_t i = 0;
+        //     while (i < length(in) && std::isdigit(in[i]))
+        //     {
+        //         ++i;
+        //     }
+
+        //     if (i > 0)
+        //         return tuple(drop(i, in), take(i, in));
+        //     else
+        //         return nothing;
+        // }
+
+        auto numeric1 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
         {
             size_t i = 0;
             while (i < length(in) && std::isdigit(in[i]))
             {
                 ++i;
             }
-
             if (i > 0)
                 return tuple(drop(i, in), take(i, in));
             else
                 return nothing;
-        }
+        };
 
         // alphanum0 will parse zero or more alphanumeric characters
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> alphanum0(const Seq<In> &in)
+
+        Maybe<Pair<StringView, StringView>> alphanum0(const StringView &in)
         {
             size_t i = 0;
             while (i < length(in) && std::isalnum(in[i]))
@@ -174,8 +192,8 @@ namespace efp
         }
 
         // alphanum1 will parse one or more alphanumeric characters
-        template <typename In>
-        Maybe<Pair<StringView, StringView>> alphanum1(const Seq<In> &in)
+
+        Maybe<Pair<StringView, StringView>> alphanum1(const StringView &in)
         {
             size_t i = 0;
             while (i < length(in) && std::isalnum(in[i]))
@@ -189,51 +207,7 @@ namespace efp
                 return nothing;
         }
 
-        // Tag
-
-        // struct Tag
-        // {
-        //     StringView t;
-
-        //     template <typename In>
-        //     Maybe<Pair<StringView, StringView>> operator()(const Seq<In> &in)
-        //     {
-        //         if (start_with(in, t))
-        //             return tuple(drop(length(t), in), t);
-        //         else
-        //             return nothing;
-        //     }
-        // };
-
-        // Tag tag(const char *str)
-        // {
-        //     return Tag{StringView{str, strlen(str)}};
-        // }
-
-        // template <StringView tag>
-        // struct Tag
-        // {
-        //     // static constexpr StringView tag = {t, strlen(t)};
-
-        //     template <typename In>
-        //     Maybe<Pair<StringView, StringView>> operator()(const Seq<In> &in)
-        //     {
-        //         if (start_with(in, t))
-        //             return tuple(drop(strlen(tag), in), tag);
-        //         else
-        //             return nothing;
-        //     }
-        // };
-
-#define efp_tag_parser(x)
-
-        // template <const char *str>
-        // Tag<str> tag(const char *str)
-        // {
-        //     return Tag{StringView{str, strlen(str)}};
-        // }
-
-        // Alt
+        // Parser combinators
 
         template <typename... Ps>
         struct Alt
@@ -241,7 +215,7 @@ namespace efp
             Tuple<Ps...> ps;
 
             template <size_t n, typename In, typename = EnableIf<(n < sizeof...(Ps))>>
-            auto impl(const Seq<In> &in) -> Maybe<Pair<StringView, StringView>>
+            auto impl(const In &in) -> Common<CallReturn<Ps, In>...>
             {
                 const auto res = get<n>(ps)(in);
 
@@ -253,13 +227,13 @@ namespace efp
 
             // Base case: when n equals the size of the tuple, stop recursion.
             template <size_t n, typename In, typename = EnableIf<(n >= sizeof...(Ps))>, typename = void>
-            auto impl(const Seq<In> &in) -> Maybe<Pair<StringView, StringView>>
+            auto impl(const In &in) -> Common<CallReturn<Ps, In>...>
             {
                 return nothing; // Or some representation of failure
             }
 
             template <typename In>
-            auto operator()(const Seq<In> &in) -> Maybe<Pair<StringView, StringView>>
+            auto operator()(const In &in) -> Common<CallReturn<Ps, In>...>
             {
                 return impl<0>(in);
             }
@@ -274,7 +248,5 @@ namespace efp
 
     };
 };
-
-#endif
 
 #endif

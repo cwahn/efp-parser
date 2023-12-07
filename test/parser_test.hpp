@@ -265,4 +265,57 @@ TEST_CASE("Alt parser works correctly", "[Alt]")
     }
 }
 
+TEST_CASE("Alt parser with nested alternatives works correctly", "[Alt]")
+{
+    SECTION("Nested alternatives with multiple matching parsers")
+    {
+        // Define some simple parsers
+        auto a_parser = ch('a');
+        auto b_parser = ch('b');
+        auto tag_parser = tag("tag");
+
+        // Create a nested alternative parser
+        auto nested_alt = alt(a_parser, alt(b_parser, tag_parser), numeric1);
+
+        // Test case where the first parser matches
+        {
+            auto result = nested_alt(StringView{"apple", 5});
+            CHECK(result);
+            if (result)
+            {
+                CHECK(fst(result.value()).size() == 4); // "pple"
+                CHECK(snd(result.value()).size() == 1); // "a"
+            }
+        }
+
+        // Test case where the nested alternative matches
+        {
+            auto result = nested_alt(StringView{"tagvalue", 8});
+            CHECK(result);
+            if (result)
+            {
+                CHECK(fst(result.value()).size() == 5); // "value"
+                CHECK(snd(result.value()).size() == 3); // "tag"
+            }
+        }
+
+        // Test case where the last parser matches
+        {
+            auto result = nested_alt(StringView{"1234", 4});
+            CHECK(result);
+            if (result)
+            {
+                CHECK(fst(result.value()).size() == 0); // Empty (all input consumed)
+                CHECK(snd(result.value()).size() == 4); // "1234"
+            }
+        }
+
+        // Test case where no parsers match
+        {
+            auto result = nested_alt(StringView{"!none", 5});
+            CHECK_FALSE(result);
+        }
+    }
+}
+
 #endif
