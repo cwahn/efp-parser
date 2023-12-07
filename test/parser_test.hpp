@@ -8,7 +8,6 @@
 
 using namespace efp;
 using namespace efp::parser;
-// using namespace efp::parser;
 
 TEST_CASE("start_with function works correctly", "[start_with]")
 {
@@ -30,6 +29,7 @@ TEST_CASE("Ch parser works correctly", "[Ch]")
     SECTION("Sequence starts with the character")
     {
         auto result = ch('a')(StringView{"apple", 5});
+        // auto result = Ch<'a'>{}(StringView{"apple", 5});
 
         CHECK(result);
         if (result)
@@ -42,6 +42,33 @@ TEST_CASE("Ch parser works correctly", "[Ch]")
     SECTION("Sequence does not start with the character")
     {
         auto result = ch('a')(StringView{"banana", 6});
+        // auto result = Ch<'a'>{}(StringView{"banana", 6});
+
+        CHECK_FALSE(result);
+    }
+}
+
+// EFP_PARSER_TAG(ParseTag, "<tag>")
+
+TEST_CASE("Tag parser works correctly", "[Tag]")
+{
+    SECTION("Sequence starts with the tag")
+    {
+        auto result = tag("<tag>")(StringView{"<tag>value", 10});
+        // auto result = ParseTag{}(StringView{"<tag>value", 10});
+
+        CHECK(result);
+        if (result)
+        {
+            CHECK(fst(result.value()).size() == 5); // "value"
+            CHECK(snd(result.value()).size() == 5); // "<tag>"
+        }
+    }
+
+    SECTION("Sequence does not start with the tag")
+    {
+        auto result = tag("<tag>")(StringView{"value<tag>", 10});
+        // auto result = ParseTag{}(StringView{"value<tag>", 10});
         CHECK_FALSE(result);
     }
 }
@@ -196,35 +223,16 @@ TEST_CASE("alphanum1 parser works correctly", "[alphanum1]")
     }
 }
 
-TEST_CASE("Tag parser works correctly", "[Tag]")
-{
-    // Tag tag{StringView{"<tag>", 5}};
-
-    SECTION("Sequence starts with the tag")
-    {
-        auto result = tag("<tag>")(StringView{"<tag>value", 10});
-        CHECK(result);
-        if (result)
-        {
-            CHECK(fst(result.value()).size() == 5); // "value"
-            CHECK(snd(result.value()).size() == 5); // "<tag>"
-        }
-    }
-
-    SECTION("Sequence does not start with the tag")
-    {
-        auto result = tag("<tag>")(StringView{"value<tag>", 10});
-        CHECK_FALSE(result);
-    }
-}
-
 TEST_CASE("Alt parser works correctly", "[Alt]")
 {
     // Alt<Ch, Tag> alt{tuple(Ch{'!'}, Tag{StringView{"<tag>", 5}})};
 
     SECTION("Alternative with character matches")
     {
+        // const char *tag_cstr = "<tag>";
+        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"!value", 6});
         auto result = alt(ch('!'), tag("<tag>"))(StringView{"!value", 6});
+
         CHECK(result);
         if (result)
         {
@@ -235,7 +243,10 @@ TEST_CASE("Alt parser works correctly", "[Alt]")
 
     SECTION("Alternative with tag matches")
     {
+        // const char *tag_cstr = "<tag>";
+        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"<tag>value", 10});
         auto result = alt(ch('!'), tag("<tag>"))(StringView{"<tag>value", 10});
+
         CHECK(result);
         if (result)
         {
@@ -246,7 +257,10 @@ TEST_CASE("Alt parser works correctly", "[Alt]")
 
     SECTION("No alternatives match")
     {
+        // const char *tag_cstr = "<tag>";
+        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"value", 5});
         auto result = alt(ch('!'), tag("<tag>"))(StringView{"value", 5});
+
         CHECK_FALSE(result);
     }
 }
