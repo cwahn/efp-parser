@@ -335,4 +335,27 @@ TEST_CASE("multispace0 and multispace1 parsers work correctly")
     }
 }
 
+TEST_CASE("newline parser works correctly", "[newline]")
+{
+    SECTION("String starting with newline")
+    {
+        auto result = newline("\ntest");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == '\n');
+    }
+
+    SECTION("String not starting with newline")
+    {
+        auto result = newline("test\n");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = newline("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

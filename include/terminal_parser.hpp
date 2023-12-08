@@ -249,6 +249,15 @@ namespace efp
                 return nothing;
         }
 
+        // newline: Matches a newline character ‘\n’
+        auto newline(const StringView &in) -> Parsed<StringView, char>
+        {
+            if (!in.empty() && in[0] == '\n')
+                return tuple(drop(1, in), in[0]);
+            else
+                return nothing;
+        }
+
     }
 }
 
