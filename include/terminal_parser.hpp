@@ -224,6 +224,31 @@ namespace efp
                 return nothing;
         }
 
+        // multispace0: Recognizes zero or more whitespace characters
+        auto multispace0(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isspace(in[i]))
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // multispace1: Recognizes one or more whitespace characters
+        auto multispace1(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isspace(in[i]))
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
+
     }
 }
 

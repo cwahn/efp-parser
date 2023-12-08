@@ -302,4 +302,37 @@ TEST_CASE("line_ending parser works correctly", "[line_ending]")
     }
 }
 
+TEST_CASE("multispace0 and multispace1 parsers work correctly")
+{
+    SECTION("multispace0 with whitespace string")
+    {
+        auto result = multispace0("   abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "   ");
+    }
+
+    SECTION("multispace0 with non-whitespace string")
+    {
+        auto result = multispace0("abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "");
+    }
+
+    SECTION("multispace1 with whitespace string")
+    {
+        auto result = multispace1("   abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "   ");
+    }
+
+    SECTION("multispace1 with non-whitespace string")
+    {
+        auto result = multispace1("abc");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif
