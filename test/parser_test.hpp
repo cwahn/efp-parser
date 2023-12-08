@@ -318,4 +318,50 @@ TEST_CASE("Alt parser with nested alternatives works correctly", "[Alt]")
     }
 }
 
+TEST_CASE("tpl parser combinator works correctly", "[tpl]")
+{
+    auto a_parser = ch('a');
+    auto b_parser = ch('b');
+    auto numeric_parser = numeric1;
+
+    auto tpl_parser = tpl(a_parser, b_parser, numeric_parser);
+
+    SECTION("All parsers match in sequence")
+    {
+        auto result = tpl_parser(StringView{"ab12345", 7});
+        CHECK(result);
+        if (result)
+        {
+            auto res = snd(result.value());
+            CHECK(p<0>(res).size() == 1); // "a"
+            CHECK(p<1>(res).size() == 1); // "b"
+            CHECK(p<2>(res).size() == 5); // "12345"
+        }
+    }
+
+    SECTION("First parser fails")
+    {
+        auto result = tpl_parser(StringView{"zb12345", 7});
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Middle parser fails")
+    {
+        auto result = tpl_parser(StringView{"a12345", 6});
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Last parser fails")
+    {
+        auto result = tpl_parser(StringView{"ababc", 5});
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty input")
+    {
+        auto result = tpl_parser(StringView{"", 0});
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

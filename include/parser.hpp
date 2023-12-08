@@ -6,8 +6,6 @@
 
 namespace efp
 {
-    // Parser should be static
-
     namespace parser
     {
         template <typename In, typename T>
@@ -27,13 +25,23 @@ namespace efp
             return false;
         }
 
+        // Maybe pair of remaining and matched
+        template <typename I, typename O>
+        using Parsed = Maybe<Pair<I, O>>;
+
+        template <typename P>
+        using ParserI = TupleAt<0, EnumAt<1, Return<P>>>;
+
+        template <typename P>
+        using ParserO = TupleAt<1, EnumAt<1, Return<P>>>;
+
         // Terminal parsers
 
         struct Ch
         {
             const char c;
 
-            Maybe<Pair<StringView, StringView>> operator()(const StringView &in)
+            Parsed<StringView, StringView> operator()(const StringView &in) const
             {
                 if (length(in) > 0)
                 {
@@ -55,7 +63,7 @@ namespace efp
         {
             StringView t;
 
-            Maybe<Pair<StringView, StringView>> operator()(const StringView &in)
+            Parsed<StringView, StringView> operator()(const StringView &in) const
             {
                 if (start_with(in, t))
                     return tuple(drop(length(t), in), t);
@@ -71,23 +79,7 @@ namespace efp
 
         // alpha
 
-        // Maybe<Pair<StringView, StringView>> alpha0(const StringView &in)
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isalpha(in[i]))
-        //     {
-        //         ++i;
-        //     }
-
-        //     // Return the consumed characters and the rest of the input
-        //     if (i > 0)
-        //         return tuple(drop(i, in), take(i, in));
-        //     else
-        //         // Return the whole input and an empty string since no characters were consumed
-        //         return tuple(drop(0, in), StringView{in.data(), 0});
-        // }
-
-        auto alpha0 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
+        auto alpha0 = [](const StringView &in) -> Parsed<StringView, StringView>
         {
             size_t i = 0;
             while (i < length(in) && std::isalpha(in[i]))
@@ -99,22 +91,7 @@ namespace efp
 
         // alpha1 will parse one or more alphabetic characters
 
-        // Maybe<Pair<StringView, StringView>> alpha1(const StringView &in)
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isalpha(in[i]))
-        //     {
-        //         ++i;
-        //     }
-
-        //     // Must have consumed at least one character to succeed
-        //     if (i > 0)
-        //         return tuple(drop(i, in), take(i, in));
-        //     else
-        //         // If no characters were consumed, return nothing to indicate failure
-        //         return nothing;
-        // }
-        auto alpha1 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
+        auto alpha1 = [](const StringView &in) -> Parsed<StringView, StringView>
         {
             size_t i = 0;
             while (i < length(in) && std::isalpha(in[i]))
@@ -131,16 +108,7 @@ namespace efp
 
         // numeric0 will parse zero or more numeric characters
 
-        // Maybe<Pair<StringView, StringView>> numeric0(const StringView &in)
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isdigit(in[i]))
-        //     {
-        //         ++i;
-        //     }
-        //     return tuple(drop(i, in), take(i, in));
-        // }
-        auto numeric0 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
+        auto numeric0 = [](const StringView &in) -> Parsed<StringView, StringView>
         {
             size_t i = 0;
             while (i < length(in) && std::isdigit(in[i]))
@@ -152,21 +120,7 @@ namespace efp
 
         // numeric1 will parse one or more numeric characters
 
-        // Maybe<Pair<StringView, StringView>> numeric1(const StringView &in)
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isdigit(in[i]))
-        //     {
-        //         ++i;
-        //     }
-
-        //     if (i > 0)
-        //         return tuple(drop(i, in), take(i, in));
-        //     else
-        //         return nothing;
-        // }
-
-        auto numeric1 = [](const auto &in) -> Maybe<Pair<StringView, StringView>>
+        auto numeric1 = [](const StringView &in) -> Parsed<StringView, StringView>
         {
             size_t i = 0;
             while (i < length(in) && std::isdigit(in[i]))
@@ -181,7 +135,7 @@ namespace efp
 
         // alphanum0 will parse zero or more alphanumeric characters
 
-        Maybe<Pair<StringView, StringView>> alphanum0(const StringView &in)
+        Parsed<StringView, StringView> alphanum0(const StringView &in)
         {
             size_t i = 0;
             while (i < length(in) && std::isalnum(in[i]))
@@ -193,7 +147,7 @@ namespace efp
 
         // alphanum1 will parse one or more alphanumeric characters
 
-        Maybe<Pair<StringView, StringView>> alphanum1(const StringView &in)
+        Parsed<StringView, StringView> alphanum1(const StringView &in)
         {
             size_t i = 0;
             while (i < length(in) && std::isalnum(in[i]))
@@ -246,6 +200,100 @@ namespace efp
             return Alt<Ps...>{tuple(ps...)};
         }
 
+        // Tpl
+        // Basic sequential parser
+
+        template <size_t n, typename Tuple, typename In, typename... Results>
+        struct TupleProcessor
+        {
+        };
+
+        template <size_t n, typename In, typename... Ps, typename... Results>
+        struct TupleProcessor<n, Tuple<Ps...>, In, Results...>
+        {
+            static auto process(const Tuple<Ps...> &t, const In &in, Results... results)
+                -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+            {
+                const auto res = get<n>(t)(in);
+
+                if (!res)
+                    return nothing; // If any parser fails, return nothing
+                else
+                    // Recursive call with the next index
+                    return TupleProcessor<n + 1, Tuple<Ps...>, In, Results..., decltype(snd(res.value()))>::process(
+                        t, fst(res.value()), results..., snd(res.value()));
+            }
+        };
+
+        // Specialization for the base case
+        template <typename In, typename... Ps, typename... Results>
+        struct TupleProcessor<sizeof...(Ps), Tuple<Ps...>, In, Results...>
+        {
+            static auto process(const Tuple<Ps...> &t, const In &in, Results... results)
+                -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+            {
+                return tuple(in, tuple(results...)); // Returning the accumulated results
+            }
+        };
+
+        template <typename... Ps>
+        struct Tpl
+        {
+            Tuple<Ps...> ps;
+
+            template <typename In>
+            auto operator()(const In &in) const
+                -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+            {
+                return TupleProcessor<0, Tuple<Ps...>, In>::process(ps, in);
+            }
+        };
+
+        // template <typename... Ps>
+        // struct Tpl
+        // {
+        //     Tuple<Ps...> ps;
+
+        //     template <size_t n>
+        //     struct OperatorImpl
+        //     {
+        //         template <typename In, typename... Results>
+        //         static auto impl(const In &in, Results... results)
+        //             -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+        //         {
+        //             const auto res = get<n>(ps)(in);
+
+        //             if (!res)
+        //                 return nothing; // If any parser fails, return nothing
+        //             else
+        //                 return impl<n + 1>(fst(res.value()), results..., snd(res.value()));
+        //         }
+        //     };
+
+        //     template <>
+        //     struct OperatorImpl<sizeof...(Ps)>
+        //     {
+        //         template <typename In, typename... Results>
+        //         static auto impl(const In &in, Results... results)
+        //             -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+        //         {
+        //             return tuple(results...); // Return the accumulated results as a tuple
+        //         }
+        //     };
+
+        //     template <typename In>
+        //     auto operator()(const In &in)
+        //         -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
+        //     {
+        //         return OperatorImpl::impl<0>(in);
+        //     }
+        // };
+
+        template <typename... Ps>
+        auto tpl(const Ps &...ps) -> Tpl<Ps...>
+        {
+            return Tpl<Ps...>{tuple(ps...)};
+        }
     };
 };
 
