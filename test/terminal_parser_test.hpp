@@ -408,4 +408,37 @@ TEST_CASE("not_line_ending parser works correctly", "[not_line_ending]")
     }
 }
 
+TEST_CASE("oct_digit0 and oct_digit1 parsers work correctly")
+{
+    SECTION("oct_digit0 with octal string")
+    {
+        auto result = oct_digit0("12345670abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "12345670");
+    }
+
+    SECTION("oct_digit0 with non-octal string")
+    {
+        auto result = oct_digit0("9abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "9abc");
+        CHECK(snd(result.value()) == "");
+    }
+
+    SECTION("oct_digit1 with octal string")
+    {
+        auto result = oct_digit1("12345670abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "12345670");
+    }
+
+    SECTION("oct_digit1 with non-octal string")
+    {
+        auto result = oct_digit1("9abc");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

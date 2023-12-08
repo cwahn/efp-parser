@@ -294,6 +294,31 @@ namespace efp
                 return nothing;
         }
 
+        // oct_digit0: Parses zero or more octal characters (0-7)
+        auto oct_digit0(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && in[i] >= '0' && in[i] <= '7')
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // oct_digit1: Parses one or more octal characters (0-7)
+        auto oct_digit1(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && in[i] >= '0' && in[i] <= '7')
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
+
     }
 }
 
