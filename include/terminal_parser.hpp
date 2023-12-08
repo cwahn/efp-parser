@@ -390,6 +390,15 @@ namespace efp
                 return nothing;
         }
 
+        // tab: Matches a tab character ‘\t’
+        auto tab(const StringView &in) -> Parsed<StringView, char>
+        {
+            if (!in.empty() && in[0] == '\t')
+                return tuple(drop(1, in), '\t');
+            else
+                return nothing;
+        }
+
     }
 }
 

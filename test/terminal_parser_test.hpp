@@ -531,4 +531,27 @@ TEST_CASE("space0 and space1 parsers work correctly")
     }
 }
 
+TEST_CASE("tab parser works correctly", "[tab]")
+{
+    SECTION("String starting with a tab")
+    {
+        auto result = tab("\ttest");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == '\t');
+    }
+
+    SECTION("String not starting with a tab")
+    {
+        auto result = tab("test\t");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = tab("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif
