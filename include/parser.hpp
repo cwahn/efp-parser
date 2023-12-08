@@ -8,8 +8,7 @@ namespace efp
 {
     namespace parser
     {
-        template <typename In, typename T>
-        bool start_with(const Seq<In> &in, const Seq<T> &t)
+        bool start_with(const StringView &in, const StringView &t)
         {
             const auto t_length = length(t);
 
@@ -88,15 +87,6 @@ namespace efp
 
             return tuple(drop(i, in), take(i, in));
         }
-        // auto alpha0 = [](const StringView &in) -> Parsed<StringView, StringView>
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isalpha(in[i]))
-        //     {
-        //         ++i;
-        //     }
-        //     return i > 0 ? tuple(drop(i, in), take(i, in)) : tuple(drop(0, in), StringView{in.data(), 0});
-        // };
 
         // alpha1 will parse one or more alphabetic characters
         auto alpha1(const StringView &in) -> Parsed<StringView, StringView>
@@ -112,20 +102,6 @@ namespace efp
             else
                 return nothing;
         }
-        // auto alpha1 = [](const StringView &in) -> Parsed<StringView, StringView>
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isalpha(in[i]))
-        //     {
-        //         ++i;
-        //     }
-        //     // Must have consumed at least one character to succeed
-        //     if (i > 0)
-        //         return tuple(drop(i, in), take(i, in));
-        //     else
-        //         // If no characters were consumed, return nothing to indicate failure
-        //         return nothing;
-        // };
 
         // numeric0 will parse zero or more numeric characters
         auto numeric0(const StringView &in) -> Parsed<StringView, StringView>
@@ -138,15 +114,6 @@ namespace efp
 
             return tuple(drop(i, in), take(i, in));
         }
-        // auto numeric0 = [](const StringView &in) -> Parsed<StringView, StringView>
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isdigit(in[i]))
-        //     {
-        //         ++i;
-        //     }
-        //     return tuple(drop(i, in), take(i, in));
-        // };
 
         // numeric1 will parse one or more numeric characters
         auto numeric1(const StringView &in) -> Parsed<StringView, StringView>
@@ -162,21 +129,8 @@ namespace efp
             else
                 return nothing;
         }
-        // auto numeric1 = [](const StringView &in) -> Parsed<StringView, StringView>
-        // {
-        //     size_t i = 0;
-        //     while (i < length(in) && std::isdigit(in[i]))
-        //     {
-        //         ++i;
-        //     }
-        //     if (i > 0)
-        //         return tuple(drop(i, in), take(i, in));
-        //     else
-        //         return nothing;
-        // };
 
         // alphanum0 will parse zero or more alphanumeric characters
-
         Parsed<StringView, StringView> alphanum0(const StringView &in)
         {
             size_t i = 0;
@@ -188,7 +142,6 @@ namespace efp
         }
 
         // alphanum1 will parse one or more alphanumeric characters
-
         Parsed<StringView, StringView> alphanum1(const StringView &in)
         {
             size_t i = 0;
@@ -204,7 +157,6 @@ namespace efp
         }
 
         // Parser combinators
-
         template <typename... Ps>
         struct Alt
         {
@@ -228,8 +180,7 @@ namespace efp
                 return nothing; // Or some representation of failure
             }
 
-            template <typename In>
-            auto operator()(const In &in) -> Common<CallReturn<Ps, In>...>
+            auto operator()(const Common<ParserI<Ps>...> &in) -> Common<CallReturn<Ps, Common<ParserI<Ps>...>>...>
             {
                 return impl<0>(in);
             }
@@ -242,18 +193,18 @@ namespace efp
             return Alt<FuncToFuncPtr<Ps>...>{tuple(ps...)};
         }
 
-        // Tpl
+        // Seq
         // Basic sequential parser
 
         namespace detail
         {
             template <size_t n, typename Tuple, typename In, typename... Results>
-            struct TupleProcessor
+            struct SeqImpl
             {
             };
 
             template <size_t n, typename In, typename... Ps, typename... Results>
-            struct TupleProcessor<n, Tuple<Ps...>, In, Results...>
+            struct SeqImpl<n, Tuple<Ps...>, In, Results...>
             {
                 static auto process(const Tuple<Ps...> &t, const In &in, Results... results)
                     -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
@@ -264,14 +215,14 @@ namespace efp
                         return nothing; // If any parser fails, return nothing
                     else
                         // Recursive call with the next index
-                        return TupleProcessor<n + 1, Tuple<Ps...>, In, Results..., decltype(snd(res.value()))>::process(
+                        return SeqImpl<n + 1, Tuple<Ps...>, In, Results..., decltype(snd(res.value()))>::process(
                             t, fst(res.value()), results..., snd(res.value()));
                 }
             };
 
             // Specialization for the base case
             template <typename In, typename... Ps, typename... Results>
-            struct TupleProcessor<sizeof...(Ps), Tuple<Ps...>, In, Results...>
+            struct SeqImpl<sizeof...(Ps), Tuple<Ps...>, In, Results...>
             {
                 static auto process(const Tuple<Ps...> &t, const In &in, Results... results)
                     -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
@@ -282,63 +233,22 @@ namespace efp
         }
 
         template <typename... Ps>
-        struct Tpl
+        struct Seq
         {
             Tuple<Ps...> ps;
 
-            template <typename In>
-            auto operator()(const In &in) const
+            auto operator()(const Common<ParserI<Ps>...> &in) const
                 -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
             {
-                return detail::TupleProcessor<0, Tuple<Ps...>, In>::process(ps, in);
+                return detail::SeqImpl<0, Tuple<Ps...>, Common<ParserI<Ps>...>>::process(ps, in);
             }
         };
 
-        // template <typename... Ps>
-        // struct Tpl
-        // {
-        //     Tuple<Ps...> ps;
-
-        //     template <size_t n>
-        //     struct OperatorImpl
-        //     {
-        //         template <typename In, typename... Results>
-        //         static auto impl(const In &in, Results... results)
-        //             -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
-        //         {
-        //             const auto res = get<n>(ps)(in);
-
-        //             if (!res)
-        //                 return nothing; // If any parser fails, return nothing
-        //             else
-        //                 return impl<n + 1>(fst(res.value()), results..., snd(res.value()));
-        //         }
-        //     };
-
-        //     template <>
-        //     struct OperatorImpl<sizeof...(Ps)>
-        //     {
-        //         template <typename In, typename... Results>
-        //         static auto impl(const In &in, Results... results)
-        //             -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
-        //         {
-        //             return tuple(results...); // Return the accumulated results as a tuple
-        //         }
-        //     };
-
-        //     template <typename In>
-        //     auto operator()(const In &in)
-        //         -> Parsed<Common<ParserI<Ps>...>, Tuple<ParserO<Ps>...>>
-        //     {
-        //         return OperatorImpl::impl<0>(in);
-        //     }
-        // };
-
         template <typename... Ps>
-        auto tpl(const Ps &...ps)
-            -> Tpl<FuncToFuncPtr<Ps>...>
+        auto seq(const Ps &...ps)
+            -> Seq<FuncToFuncPtr<Ps>...>
         {
-            return Tpl<FuncToFuncPtr<Ps>...>{tuple(ps...)};
+            return Seq<FuncToFuncPtr<Ps>...>{tuple(ps...)};
         }
     };
 };

@@ -13,36 +13,33 @@ TEST_CASE("start_with function works correctly", "[start_with]")
 {
     SECTION("Sequence starts with the given prefix")
     {
-        CHECK(start_with(StringView{"hello", 5}, StringView{"he", 2}));
+        CHECK(start_with("hello", "he"));
     }
 
     SECTION("Sequence does not start with the given prefix")
     {
-        CHECK_FALSE(start_with(StringView{"hello", 5}, StringView{"lo", 2}));
+        CHECK_FALSE(start_with("hello", "lo"));
     }
 }
 
 TEST_CASE("Ch parser works correctly", "[Ch]")
 {
-    // Ch c{'a'};
 
     SECTION("Sequence starts with the character")
     {
-        auto result = ch('a')(StringView{"apple", 5});
-        // auto result = Ch<'a'>{}(StringView{"apple", 5});
+        auto result = ch('a')("apple");
 
         CHECK(result);
         if (result)
         {
-            CHECK(fst(result.value()).size() == 4); // "pple"
-            CHECK(snd(result.value()).size() == 1); // "a"
+            CHECK(fst(result.value()) == "pple");
+            CHECK(snd(result.value()) == "a");
         }
     }
 
     SECTION("Sequence does not start with the character")
     {
-        auto result = ch('a')(StringView{"banana", 6});
-        // auto result = Ch<'a'>{}(StringView{"banana", 6});
+        auto result = ch('a')("banana");
 
         CHECK_FALSE(result);
     }
@@ -77,26 +74,26 @@ TEST_CASE("alpha0 parser works correctly", "[alpha0]")
 {
     SECTION("Sequence with only alphabetic characters")
     {
-        auto result = alpha0(StringView{"abcde", 5});
+        auto result = alpha0("abcde");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 5); // Parsed "abcde"
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == "abcde");
     }
 
     SECTION("Empty sequence")
     {
-        auto result = alpha0(StringView{"", 0});
+        auto result = alpha0("");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == "");
     }
 
     SECTION("Sequence starting with non-alphabetic characters")
     {
-        auto result = alpha0(StringView{"123abc", 6});
+        auto result = alpha0("123abc");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 6); // Remaining input is "123abc"
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == "123abc");
+        CHECK(snd(result.value()) == "");
     }
 }
 
@@ -104,22 +101,22 @@ TEST_CASE("alpha1 parser works correctly", "[alpha1]")
 {
     SECTION("Sequence with only alphabetic characters")
     {
-        auto result = alpha1(StringView{"abcde", 5});
+        auto result = alpha1("abcde");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 5); // Parsed "abcde"
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == "abcde");
     }
 
     SECTION("Empty sequence")
     {
-        auto result = alpha1(StringView{"", 0});
-        CHECK_FALSE(result); // Should fail as there are no characters
+        auto result = alpha1("");
+        CHECK_FALSE(result);
     }
 
     SECTION("Sequence starting with non-alphabetic characters")
     {
-        auto result = alpha1(StringView{"123abc", 6});
-        CHECK_FALSE(result); // Should fail as the first character is not alphabetic
+        auto result = alpha1("123abc");
+        CHECK_FALSE(result);
     }
 }
 
@@ -127,26 +124,26 @@ TEST_CASE("numeric0 parser works correctly", "[numeric0]")
 {
     SECTION("Sequence with only numeric characters")
     {
-        auto result = numeric0(StringView{"12345", 5});
+        auto result = numeric0("12345");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 5); // Parsed "12345"
+        CHECK(fst(result.value()) == "");      // Direct string comparison
+        CHECK(snd(result.value()) == "12345"); // Direct string comparison
     }
 
     SECTION("Empty sequence")
     {
-        auto result = numeric0(StringView{"", 0});
+        auto result = numeric0("");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == ""); // Direct string comparison
+        CHECK(snd(result.value()) == ""); // Direct string comparison
     }
 
     SECTION("Sequence starting with non-numeric characters")
     {
-        auto result = numeric0(StringView{"abc123", 6});
+        auto result = numeric0("abc123");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 6); // Remaining input is "abc123"
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == "abc123"); // Direct string comparison
+        CHECK(snd(result.value()) == "");       // Direct string comparison
     }
 }
 
@@ -154,21 +151,21 @@ TEST_CASE("numeric1 parser works correctly", "[numeric1]")
 {
     SECTION("Sequence with only numeric characters")
     {
-        auto result = numeric1(StringView{"12345", 5});
+        auto result = numeric1("12345");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 5); // Parsed "12345"
+        CHECK(fst(result.value()) == "");      // Direct string comparison
+        CHECK(snd(result.value()) == "12345"); // Direct string comparison
     }
 
     SECTION("Empty sequence")
     {
-        auto result = numeric1(StringView{"", 0});
+        auto result = numeric1("");
         CHECK_FALSE(result); // Should fail as there are no characters
     }
 
     SECTION("Sequence starting with non-numeric characters")
     {
-        auto result = numeric1(StringView{"abc123", 6});
+        auto result = numeric1("abc123");
         CHECK_FALSE(result); // Should fail as the first character is not numeric
     }
 }
@@ -177,26 +174,26 @@ TEST_CASE("alphanum0 parser works correctly", "[alphanum0]")
 {
     SECTION("Sequence with only alphanumeric characters")
     {
-        auto result = alphanum0(StringView{"abc123", 6});
+        auto result = alphanum0("abc123");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 6); // Parsed "abc123"
+        CHECK(fst(result.value()) == "");       // Direct string comparison
+        CHECK(snd(result.value()) == "abc123"); // Direct string comparison
     }
 
     SECTION("Empty sequence")
     {
-        auto result = alphanum0(StringView{"", 0});
+        auto result = alphanum0("");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == ""); // Direct string comparison
+        CHECK(snd(result.value()) == ""); // Direct string comparison
     }
 
     SECTION("Sequence with non-alphanumeric characters")
     {
-        auto result = alphanum0(StringView{"!@#abc123", 9});
+        auto result = alphanum0("!@#abc123");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 9); // Remaining input is "!@#abc123"
-        CHECK(snd(result.value()).size() == 0); // Parsed nothing
+        CHECK(fst(result.value()) == "!@#abc123"); // Direct string comparison
+        CHECK(snd(result.value()) == "");          // Direct string comparison
     }
 }
 
@@ -204,63 +201,51 @@ TEST_CASE("alphanum1 parser works correctly", "[alphanum1]")
 {
     SECTION("Sequence with only alphanumeric characters")
     {
-        auto result = alphanum1(StringView{"abc123", 6});
+        auto result = alphanum1("abc123");
         CHECK(result);
-        CHECK(fst(result.value()).size() == 0); // Remaining input is empty
-        CHECK(snd(result.value()).size() == 6); // Parsed "abc123"
+        CHECK(fst(result.value()) == "");       // Direct string comparison
+        CHECK(snd(result.value()) == "abc123"); // Direct string comparison
     }
 
     SECTION("Empty sequence")
     {
-        auto result = alphanum1(StringView{"", 0});
+        auto result = alphanum1("");
         CHECK_FALSE(result); // Should fail as there are no characters
     }
 
     SECTION("Sequence with non-alphanumeric characters")
     {
-        auto result = alphanum1(StringView{"!@#abc123", 9});
+        auto result = alphanum1("!@#abc123");
         CHECK_FALSE(result); // Should fail as the first character is not alphanumeric
     }
 }
-
 TEST_CASE("Alt parser works correctly", "[Alt]")
 {
-    // Alt<Ch, Tag> alt{tuple(Ch{'!'}, Tag{StringView{"<tag>", 5}})};
-
     SECTION("Alternative with character matches")
     {
-        // const char *tag_cstr = "<tag>";
-        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"!value", 6});
-        auto result = alt(ch('!'), tag("<tag>"))(StringView{"!value", 6});
-
+        auto result = alt(ch('!'), tag("<tag>"))("!value");
         CHECK(result);
         if (result)
         {
-            CHECK(fst(result.value()).size() == 5); // "value"
-            CHECK(snd(result.value()).size() == 1); // "!"
+            CHECK(fst(result.value()) == "value");
+            CHECK(snd(result.value()) == "!");
         }
     }
 
     SECTION("Alternative with tag matches")
     {
-        // const char *tag_cstr = "<tag>";
-        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"<tag>value", 10});
-        auto result = alt(ch('!'), tag("<tag>"))(StringView{"<tag>value", 10});
-
+        auto result = alt(ch('!'), tag("<tag>"))("<tag>value");
         CHECK(result);
         if (result)
         {
-            CHECK(fst(result.value()).size() == 5); // "value"
-            CHECK(snd(result.value()).size() == 5); // "<tag>"
+            CHECK(fst(result.value()) == "value");
+            CHECK(snd(result.value()) == "<tag>");
         }
     }
 
     SECTION("No alternatives match")
     {
-        // const char *tag_cstr = "<tag>";
-        // auto result = alt(Ch<'!'>{}, Tag<"<tag>">{})(StringView{"value", 5});
-        auto result = alt(ch('!'), tag("<tag>"))(StringView{"value", 5});
-
+        auto result = alt(ch('!'), tag("<tag>"))("value");
         CHECK_FALSE(result);
     }
 }
@@ -269,97 +254,87 @@ TEST_CASE("Alt parser with nested alternatives works correctly", "[Alt]")
 {
     SECTION("Nested alternatives with multiple matching parsers")
     {
-        // Define some simple parsers
-        auto a_parser = ch('a');
-        auto b_parser = ch('b');
-        auto tag_parser = tag("tag");
-
-        // Create a nested alternative parser
-        auto nested_alt = alt(a_parser, alt(b_parser, tag_parser), numeric1);
+        auto nested_alt = alt(ch('a'), alt(ch('b'), tag("tag")), numeric1);
 
         // Test case where the first parser matches
         {
-            auto result = nested_alt(StringView{"apple", 5});
+            auto result = nested_alt("apple");
             CHECK(result);
             if (result)
             {
-                CHECK(fst(result.value()).size() == 4); // "pple"
-                CHECK(snd(result.value()).size() == 1); // "a"
+                CHECK(fst(result.value()) == "pple");
+                CHECK(snd(result.value()) == "a");
             }
         }
 
         // Test case where the nested alternative matches
         {
-            auto result = nested_alt(StringView{"tagvalue", 8});
+            auto result = nested_alt("tagvalue");
             CHECK(result);
             if (result)
             {
-                CHECK(fst(result.value()).size() == 5); // "value"
-                CHECK(snd(result.value()).size() == 3); // "tag"
+                CHECK(fst(result.value()) == "value");
+                CHECK(snd(result.value()) == "tag");
             }
         }
 
         // Test case where the last parser matches
         {
-            auto result = nested_alt(StringView{"1234", 4});
+            auto result = nested_alt("1234");
             CHECK(result);
             if (result)
             {
-                CHECK(fst(result.value()).size() == 0); // Empty (all input consumed)
-                CHECK(snd(result.value()).size() == 4); // "1234"
+                CHECK(fst(result.value()).empty()); // All input consumed
+                CHECK(snd(result.value()) == "1234");
             }
         }
 
         // Test case where no parsers match
         {
-            auto result = nested_alt(StringView{"!none", 5});
+            auto result = nested_alt("!none");
             CHECK_FALSE(result);
         }
     }
 }
 
-TEST_CASE("tpl parser combinator works correctly", "[tpl]")
+TEST_CASE("seq parser combinator works correctly", "[seq]")
 {
-    auto a_parser = ch('a');
-    auto b_parser = ch('b');
-    auto numeric_parser = numeric1;
-
-    auto tpl_parser = tpl(a_parser, b_parser, numeric_parser);
+    auto seq_parser = seq(ch('a'), ch('b'), numeric1);
 
     SECTION("All parsers match in sequence")
     {
-        auto result = tpl_parser(StringView{"ab12345", 7});
+        auto result = seq_parser("ab12345");
         CHECK(result);
         if (result)
         {
             auto res = snd(result.value());
-            CHECK(p<0>(res).size() == 1); // "a"
-            CHECK(p<1>(res).size() == 1); // "b"
-            CHECK(p<2>(res).size() == 5); // "12345"
+            CHECK(p<0>(res) == "a");
+            CHECK(p<1>(res) == "b");
+            CHECK(p<2>(res) == "12345");
         }
     }
 
     SECTION("First parser fails")
     {
-        auto result = tpl_parser(StringView{"zb12345", 7});
+        auto result = seq_parser("zb12345");
         CHECK_FALSE(result);
     }
 
     SECTION("Middle parser fails")
     {
-        auto result = tpl_parser(StringView{"a12345", 6});
+        auto result = seq_parser("a12345");
         CHECK_FALSE(result);
     }
 
     SECTION("Last parser fails")
     {
-        auto result = tpl_parser(StringView{"ababc", 5});
+        auto result = seq_parser("ababc");
         CHECK_FALSE(result);
     }
 
     SECTION("Empty input")
     {
-        auto result = tpl_parser(StringView{"", 0});
+        auto result = seq_parser("");
         CHECK_FALSE(result);
     }
 }
