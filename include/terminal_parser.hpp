@@ -113,15 +113,26 @@ namespace efp
         }
 
         // ch: Recognizes a specific character
-        auto ch(char target) -> std::function<Parsed<StringView, char>(const StringView &)>
+        struct ChParser
         {
-            return [target](const StringView &in) -> Parsed<StringView, char>
+            const char c;
+
+            Parsed<StringView, char> operator()(const StringView &in) const
             {
-                if (length(in) > 0 && in[0] == target)
-                    return tuple(drop(1, in), in[0]);
-                else
-                    return nothing;
-            };
+                if (length(in) > 0)
+                {
+                    if (in[0] == c)
+                        return tuple(drop(1, in), c);
+                    else
+                        return nothing;
+                }
+                return nothing;
+            }
+        };
+
+        ChParser ch(char c)
+        {
+            return ChParser{c};
         }
 
         // crlf: Matches the string "\r\n"
@@ -182,36 +193,6 @@ namespace efp
             else
                 return nothing;
         }
-
-        // Parses a 32-bit signed integer
-        // auto int_parser(const StringView &in) -> Parsed<StringView, int>
-        // {
-        //     auto res = digit1(in); // Use digit1 to ensure at least one digit
-        //     if (!res)
-        //         return nothing;
-
-        //     int number;
-        //     if (std::from_chars(snd(res.value()).data(), snd(res.value()).data() + snd(res.value()).size(), number).ec == std::errc())
-        //     {
-        //         return tuple(fst(res.value()), number);
-        //     }
-        //     return nothing;
-        // }
-
-        // // Parses a 32-bit unsigned integer
-        // auto uint_parser(const StringView &in) -> Parsed<StringView, uint>
-        // {
-        //     auto res = digit1(in); // Use digit1 to ensure at least one digit
-        //     if (!res)
-        //         return nothing;
-
-        //     uint number;
-        //     if (std::from_chars(snd(res.value()).data(), snd(res.value()).data() + snd(res.value()).size(), number).ec == std::errc())
-        //     {
-        //         return tuple(fst(res.value()), number);
-        //     }
-        //     return nothing;
-        // }
 
         // line_ending: Recognizes an end of line (both ‘\n’ and ‘\r\n’).
         auto line_ending(const StringView &in) -> Parsed<StringView, StringView>
