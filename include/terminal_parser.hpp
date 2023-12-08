@@ -319,6 +319,28 @@ namespace efp
                 return nothing;
         }
 
+        // one_of: Recognizes one of the provided characters
+        struct OneOfParser
+        {
+            StringView chars_to_match;
+
+            OneOfParser(const char *chars)
+                : chars_to_match(StringView(chars)) {}
+
+            Parsed<StringView, char> operator()(const StringView &in) const
+            {
+                if (length(in) > 0 && elem_index(in[0], chars_to_match))
+                    return tuple(drop(1, in), in[0]);
+                else
+                    return nothing;
+            }
+        };
+
+        auto one_of(const char *chars) -> OneOfParser
+        {
+            return OneOfParser(chars);
+        }
+
     }
 }
 

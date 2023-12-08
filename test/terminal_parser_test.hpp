@@ -441,4 +441,29 @@ TEST_CASE("oct_digit0 and oct_digit1 parsers work correctly")
     }
 }
 
+TEST_CASE("OneOfParser works correctly", "[one_of]")
+{
+    OneOfParser parser("aeiou");
+
+    SECTION("String starting with a matching character")
+    {
+        auto result = parser("apple");
+        CHECK(result);
+        CHECK(fst(result.value()) == "pple");
+        CHECK(snd(result.value()) == 'a');
+    }
+
+    SECTION("String starting with a non-matching character")
+    {
+        auto result = parser("test");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = parser("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif
