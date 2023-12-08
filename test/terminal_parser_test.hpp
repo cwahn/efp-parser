@@ -252,4 +252,54 @@ TEST_CASE("hex_digit0 and hex_digit1 parsers work correctly")
     }
 }
 
+// TEST_CASE("Integer parsers work correctly")
+// {
+//     SECTION("int with valid number")
+//     {
+//         auto result = int_parser("1234abc");
+//         CHECK(result);
+//         CHECK(fst(result.value()) == "abc");
+//         CHECK(snd(result.value()) == 1234);
+//     }
+
+//     SECTION("uint with valid number")
+//     {
+//         auto result = uint_parser("4321def");
+//         CHECK(result);
+//         CHECK(fst(result.value()) == "def");
+//         CHECK(snd(result.value()) == 4321u);
+//     }
+
+//     SECTION("Invalid number")
+//     {
+//         auto result = int_parser("abc123");
+//         CHECK_FALSE(result);
+//     }
+// }
+
+TEST_CASE("line_ending parser works correctly", "[line_ending]")
+{
+    SECTION("String with CRLF line ending")
+    {
+        auto result = line_ending("\r\ntest");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "\r\n");
+    }
+
+    SECTION("String with LF line ending")
+    {
+        auto result = line_ending("\ntest");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "\n");
+    }
+
+    SECTION("String without line ending")
+    {
+        auto result = line_ending("test");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

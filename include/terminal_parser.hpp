@@ -183,6 +183,47 @@ namespace efp
                 return nothing;
         }
 
+        // Parses a 32-bit signed integer
+        // auto int_parser(const StringView &in) -> Parsed<StringView, int>
+        // {
+        //     auto res = digit1(in); // Use digit1 to ensure at least one digit
+        //     if (!res)
+        //         return nothing;
+
+        //     int number;
+        //     if (std::from_chars(snd(res.value()).data(), snd(res.value()).data() + snd(res.value()).size(), number).ec == std::errc())
+        //     {
+        //         return tuple(fst(res.value()), number);
+        //     }
+        //     return nothing;
+        // }
+
+        // // Parses a 32-bit unsigned integer
+        // auto uint_parser(const StringView &in) -> Parsed<StringView, uint>
+        // {
+        //     auto res = digit1(in); // Use digit1 to ensure at least one digit
+        //     if (!res)
+        //         return nothing;
+
+        //     uint number;
+        //     if (std::from_chars(snd(res.value()).data(), snd(res.value()).data() + snd(res.value()).size(), number).ec == std::errc())
+        //     {
+        //         return tuple(fst(res.value()), number);
+        //     }
+        //     return nothing;
+        // }
+
+        // line_ending: Recognizes an end of line (both ‘\n’ and ‘\r\n’).
+        auto line_ending(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            if (start_with(in, "\r\n"))
+                return tuple(drop(2, in), take(2, in));
+            else if (start_with(in, "\n"))
+                return tuple(drop(1, in), take(1, in));
+            else
+                return nothing;
+        }
+
     }
 }
 
