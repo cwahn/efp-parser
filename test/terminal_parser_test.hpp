@@ -219,4 +219,37 @@ TEST_CASE("digit0 and digit1 parsers work correctly")
     }
 }
 
+TEST_CASE("hex_digit0 and hex_digit1 parsers work correctly")
+{
+    SECTION("hex_digit0 with hexadecimal string")
+    {
+        auto result = hex_digit0("1a2B3cdefGHI");
+        CHECK(result);
+        CHECK(fst(result.value()) == "GHI");
+        CHECK(snd(result.value()) == "1a2B3cdef");
+    }
+
+    SECTION("hex_digit0 with non-hexadecimal string")
+    {
+        auto result = hex_digit0("GHI1a2B3c");
+        CHECK(result);
+        CHECK(fst(result.value()) == "GHI1a2B3c");
+        CHECK(snd(result.value()) == "");
+    }
+
+    SECTION("hex_digit1 with hexadecimal string")
+    {
+        auto result = hex_digit1("1a2B3cdefGHI");
+        CHECK(result);
+        CHECK(fst(result.value()) == "GHI");
+        CHECK(snd(result.value()) == "1a2B3cdef");
+    }
+
+    SECTION("hex_digit1 with non-hexadecimal string")
+    {
+        auto result = hex_digit1("GHI1a2B3c");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

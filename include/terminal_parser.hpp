@@ -158,7 +158,30 @@ namespace efp
                 return nothing;
         }
 
-        
+        // hex_digit0: Parses zero or more hexadecimal digits
+        auto hex_digit0(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isxdigit(in[i]))
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // hex_digit1: Parses one or more hexadecimal digits
+        auto hex_digit1(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isxdigit(in[i]))
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
 
     }
 }
