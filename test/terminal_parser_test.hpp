@@ -466,6 +466,76 @@ TEST_CASE("OneOfParser works correctly", "[one_of]")
     }
 }
 
+TEST_CASE("Integer parsers work correctly")
+{
+    SECTION("parse_int8 with valid number")
+    {
+        auto result = parse_int8("123");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123);
+    }
+
+    SECTION("parse_int16 with valid number")
+    {
+        auto result = parse_int16("12345");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 12345);
+    }
+
+    SECTION("parse_int32 with valid number")
+    {
+        auto result = parse_int32("123456789");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123456789);
+    }
+
+    SECTION("parse_int64 with valid number")
+    {
+        auto result = parse_int64("123456789012345");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123456789012345LL);
+    }
+}
+
+TEST_CASE("Unsigned Integer parsers work correctly")
+{
+    SECTION("parse_uint8 with valid number")
+    {
+        auto result = parse_uint8("123");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123u);
+    }
+
+    SECTION("parse_uint16 with valid number")
+    {
+        auto result = parse_uint16("12345");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 12345u);
+    }
+
+    SECTION("parse_uint32 with valid number")
+    {
+        auto result = parse_uint32("123456789");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123456789u);
+    }
+
+    SECTION("parse_uint64 with valid number")
+    {
+        auto result = parse_uint64("123456789012345");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == 123456789012345ull);
+    }
+}
+
 TEST_CASE("SatisfyParser works correctly", "[satisfy]")
 {
     auto vowel_parser = satisfy([](char c)

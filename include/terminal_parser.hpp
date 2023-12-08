@@ -341,6 +341,86 @@ namespace efp
             return OneOfParser(chars);
         }
 
+        Parsed<StringView, int8_t> parse_int8(const StringView &in)
+        {
+            int temp;
+            if (sscanf(in.data(), "%d", &temp) == 1 && temp >= std::numeric_limits<int8_t>::min() && temp <= std::numeric_limits<int8_t>::max())
+            {
+                return tuple(drop_while(isdigit, in), static_cast<int8_t>(temp));
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, int16_t> parse_int16(const StringView &in)
+        {
+            int temp;
+            if (sscanf(in.data(), "%d", &temp) == 1 && temp >= std::numeric_limits<int16_t>::min() && temp <= std::numeric_limits<int16_t>::max())
+            {
+                return tuple(drop_while(isdigit, in), static_cast<int16_t>(temp));
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, int32_t> parse_int32(const StringView &in)
+        {
+            int32_t temp;
+            if (sscanf(in.data(), "%d", &temp) == 1)
+            {
+                return tuple(drop_while(isdigit, in), temp);
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, int64_t> parse_int64(const StringView &in)
+        {
+            int64_t temp;
+            if (sscanf(in.data(), "%lld", &temp) == 1)
+            {
+                return tuple(drop_while(isdigit, in), temp);
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, uint8_t> parse_uint8(const StringView &in)
+        {
+            unsigned int temp;
+            if (sscanf(in.data(), "%u", &temp) == 1 && temp <= std::numeric_limits<uint8_t>::max())
+            {
+                return tuple(drop_while(isdigit, in), static_cast<uint8_t>(temp));
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, uint16_t> parse_uint16(const StringView &in)
+        {
+            unsigned int temp;
+            if (sscanf(in.data(), "%u", &temp) == 1 && temp <= std::numeric_limits<uint16_t>::max())
+            {
+                return tuple(drop_while(isdigit, in), static_cast<uint16_t>(temp));
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, uint32_t> parse_uint32(const StringView &in)
+        {
+            uint32_t temp;
+            if (sscanf(in.data(), "%u", &temp) == 1)
+            {
+                return tuple(drop_while(isdigit, in), temp);
+            }
+            return nothing;
+        }
+
+        Parsed<StringView, uint64_t> parse_uint64(const StringView &in)
+        {
+            uint64_t temp;
+            if (sscanf(in.data(), "%llu", &temp) == 1)
+            {
+                return tuple(drop_while(isdigit, in), temp);
+            }
+            return nothing;
+        }
+
         // satisfy: Recognizes one character and checks that it satisfies a predicate
         template <typename Predicate>
         struct SatisfyParser
