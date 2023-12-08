@@ -383,4 +383,29 @@ TEST_CASE("NoneOfParser works correctly", "[none_of]")
     }
 }
 
+TEST_CASE("not_line_ending parser works correctly", "[not_line_ending]")
+{
+    SECTION("String without line ending")
+    {
+        auto result = not_line_ending("test string");
+        CHECK(result);
+        CHECK(fst(result.value()) == "");
+        CHECK(snd(result.value()) == "test string");
+    }
+
+    SECTION("String with line ending")
+    {
+        auto result = not_line_ending("test\nstring");
+        CHECK(result);
+        CHECK(fst(result.value()) == "\nstring");
+        CHECK(snd(result.value()) == "test");
+    }
+
+    SECTION("String that is a line ending")
+    {
+        auto result = not_line_ending("\n");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

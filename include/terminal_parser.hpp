@@ -280,6 +280,20 @@ namespace efp
             return NoneOfParser(chars);
         }
 
+        // not_line_ending: Recognizes a string of any char except ‘\r\n’ or ‘\n’.
+        auto not_line_ending(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && in[i] != '\n' && in[i] != '\r')
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
+
     }
 }
 
