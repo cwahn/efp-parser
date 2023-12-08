@@ -124,6 +124,15 @@ namespace efp
             };
         }
 
+        // crlf: Matches the string "\r\n"
+        auto crlf(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            if (length(in) >= 2 && in[0] == '\r' && in[1] == '\n')
+                return tuple(drop(2, in), take(2, in));
+            else
+                return nothing;
+        }
+
     }
 }
 

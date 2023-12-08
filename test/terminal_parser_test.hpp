@@ -163,4 +163,27 @@ TEST_CASE("char parser works correctly", "[char]")
     }
 }
 
+TEST_CASE("crlf parser works correctly", "[crlf]")
+{
+    SECTION("String starting with CRLF")
+    {
+        auto result = crlf("\r\ntest");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "\r\n");
+    }
+
+    SECTION("String not starting with CRLF")
+    {
+        auto result = crlf("test\r\n");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = crlf("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif
