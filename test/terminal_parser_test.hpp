@@ -186,4 +186,37 @@ TEST_CASE("crlf parser works correctly", "[crlf]")
     }
 }
 
+TEST_CASE("digit0 and digit1 parsers work correctly")
+{
+    SECTION("digit0 with numeric string")
+    {
+        auto result = digit0("1234abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "1234");
+    }
+
+    SECTION("digit0 with non-numeric string")
+    {
+        auto result = digit0("abc123");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc123");
+        CHECK(snd(result.value()) == "");
+    }
+
+    SECTION("digit1 with numeric string")
+    {
+        auto result = digit1("1234abc");
+        CHECK(result);
+        CHECK(fst(result.value()) == "abc");
+        CHECK(snd(result.value()) == "1234");
+    }
+
+    SECTION("digit1 with non-numeric string")
+    {
+        auto result = digit1("abc123");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

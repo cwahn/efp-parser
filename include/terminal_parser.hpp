@@ -133,6 +133,33 @@ namespace efp
                 return nothing;
         }
 
+        // digit0: Parses zero or more numeric characters
+        auto digit0(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isdigit(in[i]))
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // digit1: Parses one or more numeric characters
+        auto digit1(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && std::isdigit(in[i]))
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
+
+        
+
     }
 }
 
