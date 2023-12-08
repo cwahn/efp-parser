@@ -466,4 +466,37 @@ TEST_CASE("OneOfParser works correctly", "[one_of]")
     }
 }
 
+TEST_CASE("SatisfyParser works correctly", "[satisfy]")
+{
+    auto vowel_parser = satisfy([](char c)
+                                { return c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u'; });
+
+    SECTION("String starting with a vowel")
+    {
+        auto result = vowel_parser("apple");
+        CHECK(result);
+        // ... assertions ...
+    }
+
+    SECTION("String starting with a vowel")
+    {
+        auto result = vowel_parser("apple");
+        CHECK(result);
+        CHECK(fst(result.value()) == "pple");
+        CHECK(snd(result.value()) == 'a');
+    }
+
+    SECTION("String starting with a non-vowel")
+    {
+        auto result = vowel_parser("test");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = vowel_parser("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

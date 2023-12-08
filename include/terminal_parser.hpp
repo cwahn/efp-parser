@@ -341,6 +341,30 @@ namespace efp
             return OneOfParser(chars);
         }
 
+        // satisfy: Recognizes one character and checks that it satisfies a predicate
+        template <typename Predicate>
+        struct SatisfyParser
+        {
+            Predicate pred;
+
+            explicit SatisfyParser(Predicate p) : pred(p) {}
+
+            Parsed<StringView, char> operator()(const StringView &in) const
+            {
+                if (length(in) > 0 && pred(in[0]))
+                    return tuple(drop(1, in), in[0]);
+                else
+                    return nothing;
+            }
+        };
+
+        // Constructor function for SatisfyParser
+        template <typename Predicate>
+        auto satisfy(Predicate p) -> SatisfyParser<Predicate>
+        {
+            return SatisfyParser<Predicate>(p);
+        }
+
     }
 }
 
