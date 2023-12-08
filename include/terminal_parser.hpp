@@ -365,6 +365,31 @@ namespace efp
             return SatisfyParser<Predicate>(p);
         }
 
+        // space0: Parses zero or more space characters
+        auto space0(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && in[i] == ' ')
+            {
+                ++i;
+            }
+            return tuple(drop(i, in), take(i, in));
+        }
+
+        // space1: Parses one or more space characters
+        auto space1(const StringView &in) -> Parsed<StringView, StringView>
+        {
+            size_t i = 0;
+            while (i < length(in) && in[i] == ' ')
+            {
+                ++i;
+            }
+            if (i > 0)
+                return tuple(drop(i, in), take(i, in));
+            else
+                return nothing;
+        }
+
     }
 }
 

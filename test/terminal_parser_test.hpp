@@ -475,7 +475,6 @@ TEST_CASE("SatisfyParser works correctly", "[satisfy]")
     {
         auto result = vowel_parser("apple");
         CHECK(result);
-        // ... assertions ...
     }
 
     SECTION("String starting with a vowel")
@@ -495,6 +494,39 @@ TEST_CASE("SatisfyParser works correctly", "[satisfy]")
     SECTION("Empty string")
     {
         auto result = vowel_parser("");
+        CHECK_FALSE(result);
+    }
+}
+
+TEST_CASE("space0 and space1 parsers work correctly")
+{
+    SECTION("space0 with spaces")
+    {
+        auto result = space0("   test");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "   ");
+    }
+
+    SECTION("space0 with no spaces")
+    {
+        auto result = space0("test");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "");
+    }
+
+    SECTION("space1 with spaces")
+    {
+        auto result = space1("   test");
+        CHECK(result);
+        CHECK(fst(result.value()) == "test");
+        CHECK(snd(result.value()) == "   ");
+    }
+
+    SECTION("space1 with no spaces")
+    {
+        auto result = space1("test");
         CHECK_FALSE(result);
     }
 }
