@@ -103,6 +103,27 @@ namespace efp
                 return nothing;
         }
 
+        // anychar: Matches any single character
+        auto anychar(const StringView &in) -> Parsed<StringView, char>
+        {
+            if (length(in) > 0)
+                return tuple(drop(1, in), in[0]);
+            else
+                return nothing;
+        }
+
+        // ch: Recognizes a specific character
+        auto ch(char target) -> std::function<Parsed<StringView, char>(const StringView &)>
+        {
+            return [target](const StringView &in) -> Parsed<StringView, char>
+            {
+                if (length(in) > 0 && in[0] == target)
+                    return tuple(drop(1, in), in[0]);
+                else
+                    return nothing;
+            };
+        }
+
     }
 }
 

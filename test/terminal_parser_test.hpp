@@ -121,4 +121,46 @@ TEST_CASE("alphanumeric1 parser works correctly", "[alphanumeric1]")
     }
 }
 
+TEST_CASE("anychar parser works correctly", "[anychar]")
+{
+    SECTION("Non-empty string")
+    {
+        auto result = anychar("test");
+        CHECK(result);
+        CHECK(fst(result.value()) == "est");
+        CHECK(snd(result.value()) == 't');
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = anychar("");
+        CHECK_FALSE(result);
+    }
+}
+
+TEST_CASE("char parser works correctly", "[char]")
+{
+    auto parse_a = ch('a');
+
+    SECTION("String starting with target character")
+    {
+        auto result = parse_a("apple");
+        CHECK(result);
+        CHECK(fst(result.value()) == "pple");
+        CHECK(snd(result.value()) == 'a');
+    }
+
+    SECTION("String not starting with target character")
+    {
+        auto result = parse_a("banana");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = parse_a("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif
