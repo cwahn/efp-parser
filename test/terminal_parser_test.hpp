@@ -358,4 +358,29 @@ TEST_CASE("newline parser works correctly", "[newline]")
     }
 }
 
+TEST_CASE("NoneOfParser works correctly", "[none_of]")
+{
+    auto parser = none_of("aeiou");
+
+    SECTION("String starting with a non-matching character")
+    {
+        auto result = parser("test");
+        CHECK(result);
+        CHECK(fst(result.value()) == "est");
+        CHECK(snd(result.value()) == 't');
+    }
+
+    SECTION("String starting with a matching character")
+    {
+        auto result = parser("apple");
+        CHECK_FALSE(result);
+    }
+
+    SECTION("Empty string")
+    {
+        auto result = parser("");
+        CHECK_FALSE(result);
+    }
+}
+
 #endif

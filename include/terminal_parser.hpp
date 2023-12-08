@@ -258,6 +258,28 @@ namespace efp
                 return nothing;
         }
 
+        // none_of: Recognizes a character that is not in the provided characters
+        struct NoneOfParser
+        {
+            StringView chars_to_avoid;
+
+            NoneOfParser(const char *chars)
+                : chars_to_avoid(StringView(chars)) {}
+
+            Parsed<StringView, char> operator()(const StringView &in) const
+            {
+                if (length(in) > 0 && !elem_index(in[0], chars_to_avoid))
+                    return tuple(drop(1, in), in[0]);
+                else
+                    return nothing;
+            }
+        };
+
+        auto none_of(const char *chars) -> NoneOfParser
+        {
+            return NoneOfParser(chars);
+        }
+
     }
 }
 
