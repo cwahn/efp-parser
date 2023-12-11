@@ -1,5 +1,5 @@
-#ifndef TERMINAL_PARSER_TEST_HPP_
-#define TERMINAL_PARSER_TEST_HPP_
+#ifndef CHARACTER_PARSER_TEST_HPP_
+#define CHARACTER_PARSER_TEST_HPP_
 
 #include "catch2/catch_test_macros.hpp"
 
@@ -251,31 +251,6 @@ TEST_CASE("hex_digit0 and hex_digit1 parsers work correctly")
         CHECK_FALSE(result);
     }
 }
-
-// TEST_CASE("Integer parsers work correctly")
-// {
-//     SECTION("int with valid number")
-//     {
-//         auto result = int_parser("1234abc");
-//         CHECK(result);
-//         CHECK(fst(result.value()) == "abc");
-//         CHECK(snd(result.value()) == 1234);
-//     }
-
-//     SECTION("uint with valid number")
-//     {
-//         auto result = uint_parser("4321def");
-//         CHECK(result);
-//         CHECK(fst(result.value()) == "def");
-//         CHECK(snd(result.value()) == 4321u);
-//     }
-
-//     SECTION("Invalid number")
-//     {
-//         auto result = int_parser("abc123");
-//         CHECK_FALSE(result);
-//     }
-// }
 
 TEST_CASE("line_ending parser works correctly", "[line_ending]")
 {

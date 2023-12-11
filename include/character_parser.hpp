@@ -1,8 +1,7 @@
 #ifndef EFP_TERMINAL_PARSER_HPP_
 #define EFP_TERMINAL_PARSER_HPP_
 
-#include "prelude.hpp"
-#include "string.hpp"
+#include "parser_base.hpp"
 
 // alpha0/alpha1: Parses zero or more, or one or more alphabetic characters.
 // alphanumeric0/alphanumeric1: Parses zero or more, or one or more alphanumeric characters.
@@ -27,31 +26,6 @@ namespace efp
 {
     namespace parser
     {
-        // Maybe pair of remaining and matched
-        template <typename I, typename O>
-        using Parsed = Maybe<Pair<I, O>>;
-
-        template <typename P>
-        using ParserI = TupleAt<0, EnumAt<1, Return<P>>>;
-
-        template <typename P>
-        using ParserO = TupleAt<1, EnumAt<1, Return<P>>>;
-
-        bool start_with(const StringView &in, const StringView &t)
-        {
-            const auto t_length = length(t);
-
-            if (length(in) >= t_length)
-            {
-                for (size_t i = 0; i < t_length; ++i)
-                {
-                    if (in[i] != t[i])
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
 
         // Function alpha0: Parses zero or more alphabetic characters
         auto alpha0(const StringView &in) -> Parsed<StringView, StringView>
@@ -461,6 +435,8 @@ namespace efp
         }
 
     }
+
+    
 }
 
 #endif

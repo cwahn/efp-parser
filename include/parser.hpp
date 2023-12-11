@@ -3,7 +3,9 @@
 
 #include "prelude.hpp"
 #include "string.hpp"
-#include "terminal_parser.hpp"
+#include "character_parser.hpp"
+#include "bytes_parser.hpp"
+#include "parser_combinator.hpp"
 
 namespace efp
 {
